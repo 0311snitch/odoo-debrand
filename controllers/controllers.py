@@ -92,33 +92,3 @@ class BinaryCustom(Binary):
                 response = http.send_file(placeholder(imgname + imgext))
 
         return response
-
-
-class OdooDebrand(Database):
-
-    def _render_template(self, **d):
-
-        d.setdefault('manage', True)
-        d['insecure'] = odoo.tools.config.verify_admin_password('admin')
-        d['list_db'] = odoo.tools.config['list_db']
-        d['langs'] = odoo.service.db.exp_list_lang()
-        d['countries'] = odoo.service.db.exp_list_countries()
-        d['pattern'] = DBNAME_PATTERN
-        website_id = request.env['website'].sudo().search([])
-        d['website_name'] = website_id and website_id[0].name or ''
-        d['company_name'] = website_id and website_id[0].company_id.name or ''
-        d['favicon'] = website_id and website_id[0].favicon_url or ''
-        d['company_logo_url'] = website_id and website_id[
-            0].company_logo_url or ''
-
-        # databases list
-        d['databases'] = []
-        try:
-            d['databases'] = http.db_list()
-            d['incompatible_databases'] = odoo.service.db.list_db_incompatible(
-                d['databases'])
-        except odoo.exceptions.AccessDenied:
-            monodb = db_monodb()
-            if monodb:
-                d['databases'] = [monodb]
-        return env.get_template("database_manager_extend.html").render(d)
